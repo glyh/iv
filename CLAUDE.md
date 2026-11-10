@@ -40,7 +40,7 @@ them.
 - Colour: an lcms2 transform step that is a no-op when source and destination
   agree; source pixels and profile are preserved.
 - Cache: the freedesktop thumbnail contract on disk; a byte-budgeted,
-  per-artifact LRU with pinning in memory. The budget is in bytes and covers
+  per-pixel-buffer LRU with pinning in memory. The budget is in bytes and covers
   in-flight decode buffers too.
 - Concurrency: the core owns a fixed pool with two priority bands; cancellation
   is cooperative, checked at step boundaries.
@@ -56,3 +56,17 @@ them.
 - Add a term to `CONTEXT.md` when it is introduced or sharpened. Add an ADR only
   when a decision is hard to reverse, surprising, and the result of a real
   trade-off.
+
+### Plain technical English
+
+Write the obvious term. Do not coin metaphors for things that already have plain
+names: no "currency" for a pixel type, no "wheel" for a primitive, no "hot core",
+no "multicast" for a subscriber list. A term is allowed only if `CONTEXT.md`
+defines it; add the definition before the word is used. A term used in code or
+docs that is not in `CONTEXT.md` is a bug; fix the term or add the definition.
+
+### Known gaps live in the code
+
+A gap that a later agent must know about goes in the source as a `TODO` comment,
+not only in the PR description: the next agent reads the code, not the PR. A
+`TODO` names the gap and the decision or ADR that settles it.
