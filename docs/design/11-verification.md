@@ -11,7 +11,7 @@ How do we know iv is correct?
 Verification is **unit tests only**:
 
 - Constructed inputs whose expected output is computed by hand, covering the
-  pure-Zig parts: bitmap, imageops, signal, cache accounting, budget eviction.
+  pure-Zig parts: bitmap, imageops, cache accounting, budget eviction.
 - A smoke test per decode backend: a committed fixture, asserting dimensions,
   format and no crash.
 - **No differential harness** against qimgv as a gate.

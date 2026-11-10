@@ -44,6 +44,10 @@ them.
   in-flight decode buffers too.
 - Concurrency: the core owns a fixed pool with two priority bands; cancellation
   is cooperative, checked at step boundaries.
+- Every event has exactly one consumer: an app-internal event is a plain Zig
+  callback, and a worker that must reach the Qt main thread goes through the
+  binding's `Threading` helpers. An event with two consumers is a new decision to
+  record.
 - Errors are values. Nothing in the core panics, and no `unreachable` sits on a
   path that external input can reach.
 - Verification is unit tests (`zig build test`) that need no display.
