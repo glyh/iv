@@ -25,7 +25,9 @@ them.
 3. **No commit may add something a later commit in the same PR removes.** Fold
    fix-ups into the commit that introduced the code.
 4. **When a PR is ready, ask the user for review and stop.** Do not merge it.
-5. Never force-push a branch that has been reviewed; add commits instead.
+5. Never force-push a branch that has been merged or that another branch has
+   been based on. Rebuilding an open PR when the review asks for a reshape is
+   fine; use `--force-with-lease` and keep a backup tag.
 
 ## Architecture invariants
 
