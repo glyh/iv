@@ -3,9 +3,10 @@
 ## What this is
 
 `iv` is a from-scratch Zig image viewer. Its architecture was decided before the
-first line of code. The decision records land in `docs/design/`; until they do,
-the invariants below are the contract. Code that contradicts them is a bug unless
-a new decision supersedes them.
+first line of code. The decision records are in `docs/design/`, the ADRs in
+`docs/adr/` and the vocabulary in `CONTEXT.md`; the invariants below are the
+contract. Code that contradicts them is a bug unless a new decision supersedes
+them.
 
 ## Toolchain
 
