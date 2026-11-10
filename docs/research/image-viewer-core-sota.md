@@ -1,7 +1,7 @@
-# Image viewer core: state of the art, read before porting
+# Image viewer core: state of the art, read before writing
 
-Written before porting qimgv's core to Zig, to pin down what "good" looks like
-instead of porting the current shape by default.
+Written before iv's core was written in Zig, to pin down what "good" looks like
+instead of copying the current shape by default.
 
 **Method.** This environment's plain web fetch was broken all session (every
 hostname resolved to a non-public IP), and the delegated research agents failed
@@ -185,7 +185,7 @@ decode-time downscaling**, not in their scaler.
 
 ## 5. What this implies for a Qt-free Zig core
 
-1. **Currency**: an explicit bitmap (done: `Bitmap`), 8-bit gray/RGB/RGBA
+1. **Pixel type**: an explicit bitmap (done: `Bitmap`), 8-bit gray/RGB/RGBA
    first; 16-bit/HDR later, and if HDR matters, prefer a parametric
    transfer-function design over ICC (libjxl's argument).
 2. **Decode**: C libraries behind translate-c, dispatched on magic bytes - an

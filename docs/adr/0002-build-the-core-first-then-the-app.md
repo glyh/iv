@@ -18,7 +18,7 @@ stay out; they are shell concerns.
 
 ## Consequences
 
-- The core's currency is the Zig `Bitmap`, not `QImage`; the Qt boundary converts
+- The core's pixel type is the Zig `Bitmap`, not `QImage`; the Qt boundary converts
   once, in phase 2.
 - The core is usable and testable with no Qt and no display.
 - The reference implementation stays available for consultation; nothing in the

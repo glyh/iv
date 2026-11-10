@@ -73,7 +73,7 @@ core:
 ## What it implies for decision 12
 
 Qt Quick buys GPU-everything; the price is a UI-agnostic core (ports) plus a QML
-shell. If the port wants GPU filters/HDR/panoramas, Qt Quick is the coherent
+shell. If iv wants GPU filters/HDR/panoramas, Qt Quick is the coherent
 choice. If it wants a fast, correct viewer with today's feature set, the fork's
 own measurements say GPU does not move the dominant costs (decode memory,
 directory/load latency), and `QGraphicsScene` - which seven of nine Qt viewers

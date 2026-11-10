@@ -1,6 +1,6 @@
 # GUI stack weight for a Zig qimgv on Linux
 
-Research for <https://github.com/glyh/qimgv/issues/12>. Question: if the UI leaves Qt, is anything actually lighter — or is "keep Qt, own the hot core in Zig" the only answer that pays?
+Research for <https://github.com/glyh/qimgv/issues/12>. Question: if the UI leaves Qt, is anything actually lighter — or is "keep Qt, own the core in Zig" the only answer that pays?
 
 ## Method
 
@@ -52,7 +52,7 @@ Against that bar, only `dvui` remains in play. It would mean hand-building the g
 
 **Under the map's rule (a change must win on time or memory), no toolkit replacement is defensible.** The RSS data confirms, rather than merely leans toward, the `ldd` conclusion. GTK4 costs more at rest than Qt Widgets (61 vs 44 MB) while pulling 113 libraries; GTK3 is 10 MB lighter but is a dead end and buys nothing a Zig core would not; Qt Quick is 4× worse; SDL3 residents 3× *more* than Qt Widgets while shipping none of the widgets qimgv is made of. The Zig-native field offers one candidate still in play (`dvui`), disqualified neither by the toolchain nor by design, but it has no RSS number here and would put the grid's virtualisation, the menu layer and a 93-control settings dialog back on qimgv's own plate.
 
-The decisive number is qimgv's own: **140.8 MB resident on a 5 000-image folder, on Qt Widgets, already virtualised**. Any replacement must beat that *and* reproduce today's feature set; nothing measured comes within 10 MB of the empty-window floor, let alone the working one. So the paying move is the one the map already assumes: **keep Qt as the shell, and make the hot core — decode, scale, thumbnail, cache — a Zig library behind a C ABI**, measured against the baseline in issue 6. A UI rewrite is not a memory or time win; it is a months-long feature regression with a memory bill attached.
+The decisive number is qimgv's own: **140.8 MB resident on a 5 000-image folder, on Qt Widgets, already virtualised**. Any replacement must beat that *and* reproduce today's feature set; nothing measured comes within 10 MB of the empty-window floor, let alone the working one. So the paying move is the one the map already assumes: **keep Qt as the shell, and make the core — decode, scale, thumbnail, cache — a Zig library behind a C ABI**, measured against the baseline in issue 6. A UI rewrite is not a memory or time win; it is a months-long feature regression with a memory bill attached.
 
 The one thing that would reopen this: if software rendering under Xvfb is inflating Qt Quick and SDL3, a real-GPU measurement could move those two rows. It cannot move GTK4 (already above Qt at rest with no GL involved) and it cannot move `dvui`, which is an SDL-shaped stack and would land in the same place.
 
