@@ -4,7 +4,7 @@ title: Apply EXIF orientation through an exiv2 shim
 labels: [wayfinder:task]
 status: open
 assignee:
-blocked_by: [001]
+blocked_by: [001, 003]
 ---
 
 ## Question

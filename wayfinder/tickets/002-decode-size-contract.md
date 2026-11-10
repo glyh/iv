@@ -34,3 +34,9 @@ The recommendation to grill against: `max` is an upper bound on the
 below); the result records requested and delivered size; the registry does
 **not** promise the postcondition, and the caller or the viewport completes the
 fit. This is a ticket because ticket 003 cannot be written without its answer.
+
+## Done when
+
+- The contract is written into decision 03 (or a new ADR) and into the doc
+  comments of the decode entry points, so ticket 003 can be written against it.
+- Every sub-question above has a stated answer, not a lean.

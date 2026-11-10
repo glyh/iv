@@ -4,7 +4,7 @@ title: The QRhiWidget Vulkan viewport
 labels: [wayfinder:task]
 status: open
 assignee:
-blocked_by: [005, 006]
+blocked_by: [005, 006, 011]
 ---
 
 ## Question

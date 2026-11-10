@@ -30,18 +30,21 @@ type), `src/core/imageops.zig` (a deliberate first cut of scale/crop/flip/
 rotate), `src/core/root.zig` (carries the intended build order as a TODO).
 
 **Machine, measured 2026-11-10.** Zig 0.17.0 (`/usr/bin/zig`); `zig build
-test` and `zig build` both pass on a clean `trunk`. All three dependency
-tiers of decision 03 resolve under pkg-config: libjpeg 3.2.1 (the `.pc` name is
+test` and `zig build` both pass on a clean `trunk`. Every tier-2/tier-3 library that ships a `.pc`
+resolves under pkg-config: libjpeg 3.2.1 (the `.pc` name is
 `libjpeg`, not `jpeg`), libpng 1.6.59, libwebp 1.6.0, lcms2 2.20, exiv2
 0.28.9, libtiff-4 4.7.2, libraw 0.22.3, libavif 1.4.2, libjxl 0.12.0, libheif
-1.23.7, librsvg-2.0 2.63.4. Headers for jpeg/png/webp/lcms2/exiv2/tiff are
-installed. Qt 6.12.0 with private RHI headers
+1.23.7, librsvg-2.0 2.63.4. Two do not: `stb_image` is vendored (decision
+10), and GIF has `/usr/include/gif_lib.h` but no `giflib`/`libgif` `.pc`.
+Headers for jpeg/png/webp/lcms2/exiv2/tiff are installed. Qt 6.12.0 with private RHI headers
 (`/usr/include/qt6/QtGui/6.12.0/QtGui/rhi/qrhi.h`, and
 `/usr/include/qt6/QtWidgets/qrhiwidget.h`). **`qsb` is not installed**;
 `qt6-shadertools 6.12.0-1` is available in `extra` (ticket 005).
-**libqt6zig is not checked out anywhere on this box**; per
-`docs/research/libqt6zig.md` it must be a pinned URL+hash dependency (rev
-`76fbd35`), not a path, and that research was taken on this exact toolchain.
+**libqt6zig has no git checkout here**, but the pinned package is extracted at
+`/tmp/lq6z/libqt6zig-6.8.2-OSXtXJRx…` and cached under `~/.cache/zig/p/`, so it
+is offline-usable; per `docs/research/libqt6zig.md` it must be a pinned URL+hash
+dependency, not a path, and that research was taken on this exact toolchain.
+**It binds no `QRhiWidget`** — see ticket 011, which now blocks 008.
 
 **Workflow, this effort (user, 2026-11-10).** No pull requests: land commits
 directly on `trunk` and the user pushes. That overrides CLAUDE.md's "every
