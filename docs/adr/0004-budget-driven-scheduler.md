@@ -4,7 +4,7 @@ Status: accepted
 
 The core's interface is request-based, but a scheduler inside the core decides
 whether hinted work runs eagerly or only on demand, against a user-set budget in
-**bytes** that covers retained artifacts *and* in-flight decode buffers. The
+**bytes** that covers retained pixel buffers *and* in-flight decode buffers. The
 shell supplies hints; the core decides execution. Full reasoning:
 `../design/02-core-interface.md`.
 

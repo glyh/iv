@@ -41,7 +41,8 @@ implementations (nomacs, gwenview, PhotoQt) were read and can be copied from.
 - **Every pixel buffer the core retains counts** against the byte budget: the
   decoded source frame, colour-transformed copies, scaled copies, and the
   in-flight decode buffers.
-- Eviction is **per artifact**, least-recently-used, and artifacts currently used
+- Eviction is **per pixel buffer**, least-recently-used, and pixel buffers currently
+  used
   by an in-flight request are **pinned** and not evictable. Chromium's locked /
   unlocked decode cache is the model.
 - A decoded source frame and its scaled copies therefore live and die
@@ -50,7 +51,7 @@ implementations (nomacs, gwenview, PhotoQt) were read and can be copied from.
 
 Why: bytes are what pressure the system, and "the source frame is expensive to
 recreate while a scaled copy is cheap" is only exploitable when eviction is per
-artifact. Per-image accounting erases that difference; source-only accounting
+pixel buffer. Per-image accounting erases that difference; source-only accounting
 understates real use.
 
 ## 7c - Mapping the app's thumbnail sizes onto the classes (decided)
@@ -59,7 +60,7 @@ understates real use.
   in memory. The spec explicitly allows serving a larger class and downscaling.
 - A preview larger than 1024 is derived from the decoded source and never stored
   on disk (7a).
-- The downscaled result is an artifact under 7b's accounting and can be pinned.
+- The downscaled result is a pixel buffer under 7b's accounting and can be pinned.
 
 Why: spec-sanctioned, maximises cache hits across the app's user-sizable sizes
 and across applications, and the extra in-memory downscale is cheap and

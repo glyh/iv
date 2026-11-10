@@ -22,7 +22,7 @@ the map, and `README.md` is the index.
 - **Scaling** ([06](06-scaling.md)): area prefilter above 2x, bicubic otherwise,
   Zig `@Vector` kernels.
 - **Cache** ([07](07-cache.md)): the freedesktop thumbnail contract on disk, a
-  byte-budgeted per-artifact LRU in memory.
+  byte-budgeted per-pixel-buffer LRU in memory.
 - **Concurrency** ([08](08-concurrency.md)): a core-owned fixed pool, two
   priority bands, step-boundary cancellation.
 - **EXIF** ([09](09-exif-metadata.md)): exiv2 behind a C shim - the one C++ unit

@@ -40,7 +40,7 @@ it.
 
 ## Why
 
-- Decisions 02's scheduler and progressive result stream need each backend to
+- Decisions 02's scheduler and progressive results need each backend to
   describe its own behaviour: can it downscale during decode, can it emit
   progressive results, how much memory does it allocate in flight. A registry
   gives that a home; a switch does not.

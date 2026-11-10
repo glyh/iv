@@ -42,7 +42,7 @@ them.
 - Colour: an lcms2 transform step that is a no-op when source and destination
   agree; source pixels and profile are preserved.
 - Cache: the freedesktop thumbnail contract on disk; a byte-budgeted,
-  per-artifact LRU with pinning in memory. The budget is in bytes and covers
+  per-pixel-buffer LRU with pinning in memory. The budget is in bytes and covers
   in-flight decode buffers too.
 - Concurrency: the core owns a fixed pool with two priority bands; cancellation
   is cooperative, checked at step boundaries.

@@ -54,7 +54,7 @@ concurrency (`Group.async`/`await`), `Cancelable` errors, `Semaphore`,
 ## Consequences
 
 - The core has a lifecycle (start workers, drain, stop) and a shutdown path that
-  must not leak pinned artifacts.
+  must not leak pinned pixel buffers.
 - Some decoders waste work that cannot be cancelled; the design accepts that and
   reclaims the memory.
 - Priority inversion and starvation are possible if the eager band is ever given

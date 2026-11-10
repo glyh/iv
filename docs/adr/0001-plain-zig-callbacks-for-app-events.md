@@ -1,4 +1,4 @@
-# App-internal signals become plain Zig callbacks, with a Zig multicast when needed
+# App-internal signals become plain Zig callbacks, with a Zig subscriber list when needed
 
 Status: accepted
 
@@ -7,7 +7,7 @@ cannot declare a new Qt signal on a Zig subclass, and a moc'd C++ shim would bri
 back the build iv exists to avoid. The reference viewer has 60 headers declaring
 `signals:` and 394 `connect(` sites, so this is not a corner of the design. An
 app-internal event is therefore a plain Zig callback, and where one event has
-several consumers iv uses its own single-threaded multicast
+several consumers iv uses its own single-threaded subscriber list
 (`src/core/signal.zig`) instead of a Qt signal or a C++ shim. Qt's own signals
 (`QPushButton::clicked`, `QTimer::timeout`, ...) are still consumed through the
 binding's `onSignal`.
@@ -24,5 +24,5 @@ binding's `onSignal`.
 - No `Q_OBJECT`, no moc, no C++ subclass of our own.
 - Auto-disconnect is gone: a subscriber clears its handler explicitly
   (`Signal.disconnect`).
-- The multicast is single-threaded. Cross-thread delivery is not provided; a
+- The subscriber list is single-threaded. Cross-thread delivery is not provided; a
   worker that produces results on another thread hands them back explicitly.
