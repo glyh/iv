@@ -3,10 +3,9 @@
 ## What this is
 
 `iv` is a from-scratch Zig image viewer. Its architecture was decided before the
-first line of code; the full decision records live in the qimgv port's
-`docs/design/` and are carried into this repository in a follow-up docs PR. Until
-they land, the invariants below are the contract. Code that contradicts them is a
-bug unless a new decision supersedes them.
+first line of code. The decision records land in `docs/design/`; until they do,
+the invariants below are the contract. Code that contradicts them is a bug unless
+a new decision supersedes them.
 
 ## Toolchain
 
