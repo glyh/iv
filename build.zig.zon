@@ -6,13 +6,14 @@
     .fingerprint = 0x4c801618b71e8fca,
     .minimum_zig_version = "0.17.0",
     .dependencies = .{},
-    // What a consumer of this package receives: the build files, the sources and
-    // the README. The design documents and CLAUDE.md are for this repository, not
-    // for the package.
+    // What a consumer of this package receives: the build files, the sources, the
+    // README and the licence. The design documents and CLAUDE.md are for this
+    // repository, not for the package.
     .paths = .{
         "build.zig",
         "build.zig.zon",
         "src",
         "README.md",
+        "LICENSE",
     },
 }
