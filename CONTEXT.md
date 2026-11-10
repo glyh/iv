@@ -22,14 +22,13 @@ A module that claims one or more file formats and decodes them. A backend
 recognises bytes, decodes them, or reports that the data is broken.
 _Avoid_: decoder, plugin (a plugin implies runtime loading, which this is not)
 
-**Artifact**:
-Any pixel buffer the core retains: a decoded frame, a colour-transformed copy, a
-scaled copy. Artifacts are what the budget accounts for and what eviction
-removes.
-_Avoid_: cache entry (one entry may hold several artifacts)
+**Pixel buffer**:
+A buffer the core owns: a decoded frame, a colour-transformed copy, a scaled
+copy. Pixel buffers are what the budget accounts for and what eviction removes.
+_Avoid_: cache entry (one entry may hold several pixel buffers), artifact
 
 **Budget**:
-The user-set ceiling, in bytes, on everything the core holds: artifacts and the
+The user-set ceiling, in bytes, on everything the core holds: pixel buffers and the
 in-flight buffers of work currently running.
 _Avoid_: cache size (the budget covers more than the cache)
 
@@ -38,8 +37,8 @@ The shell's statement that certain files are likely to be wanted next, in some
 order. A hint is not a commitment; the core may ignore or drop it.
 _Avoid_: request (a request is a commitment the core must answer)
 
-**Result stream**:
+**Results**:
 The sequence of results one request may produce - typically a preview at a lower
 resolution, then the final resolution. The shell renders each result as it
 arrives.
-_Avoid_: callback (too generic to be useful here)
+_Avoid_: callback (too generic to be useful here), result stream

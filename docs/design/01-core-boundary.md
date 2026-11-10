@@ -30,7 +30,7 @@ settings, video, or windows.
   ReadDirectoryChangesW on Windows, plus polling fallbacks, plus "what counts as
   a new file" rules. That churns with the shell's needs and Qt already provides
   it (QFileSystemWatcher).
-- It matches what the earlier research on qimgv called the hot core (decode ->
+- It matches what the earlier research on qimgv called the core (decode ->
   scale -> thumbnail -> cache), so the boundary is not invented here.
 - The pieces excluded will still be ported later; they just do not have to be
   correct before the first image can be decoded.

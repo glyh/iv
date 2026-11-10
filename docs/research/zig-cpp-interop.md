@@ -63,7 +63,7 @@ form is the `-isystem` recipe above plus system libstdc++ at link time.
 ## Patterns that work (and one that does not exist)
 
 1. **`extern "C"` shim** - the universal pattern: a thin C++ file exports plain C
-   functions; Zig sees only that C header. This is what the port already does
+   functions; Zig sees only that C header. This is what iv already does
    (`qzimage`, and now the exiv2 shim).
 2. **Match the stdlib and the ABI** - libstdc++ with libstdc++ libraries. This is
    the rule that decides everything else.
@@ -73,7 +73,7 @@ form is the `-isystem` recipe above plus system libstdc++ at link time.
 4. **No automatic C++ binding** - unlike Rust's `cxx`, there is no Zig tool that
    generates bindings from C++ headers; hand-written shims are the method.
 
-## What this means for the port
+## What this means for iv
 
 - The exiv2 shim **can be compiled by `zig build` itself**; the "second
   compiler" cost that decision 09 assumed largely disappears.

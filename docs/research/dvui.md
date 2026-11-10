@@ -1,6 +1,6 @@
 # Can dvui host qimgv's UI?
 
-Research for <https://github.com/glyh/qimgv/issues/16>. **Verdict: it builds, it is a real toolkit with a working virtualised scroll path — and hosting qimgv in it would be a multi-month rewrite whose measured floor is ~5× Qt Widgets. It does not beat "keep Qt as the shell, hot core in Zig".**
+Research for <https://github.com/glyh/qimgv/issues/16>. **Verdict: it builds, it is a real toolkit with a working virtualised scroll path — and hosting qimgv in it would be a multi-month rewrite whose measured floor is ~5× Qt Widgets. It does not beat "keep Qt as the shell, core in Zig".**
 
 ## 1. It builds on zig 0.17.0
 
@@ -67,7 +67,7 @@ Under the map's rule — a change must win on **time or memory** — dvui does n
 - The two things qimgv is mostly made of — the image viewport and a 93-control settings dialog — **do not exist in dvui** and would be written by hand, on top of a menu layer and the grid's caching loop.
 - That is a UI rewrite measured in months, with a memory bill at the end of it, to reach parity with what already works.
 
-**Keep Qt as the shell. Put the hot core — decode → scale → thumbnail → cache — in Zig behind the C ABI.** If the UI ever leaves Qt, dvui is the credible target, and this document says what it would cost.
+**Keep Qt as the shell. Put the core — decode → scale → thumbnail → cache — in Zig behind the C ABI.** If the UI ever leaves Qt, dvui is the credible target, and this document says what it would cost.
 
 ## Not verified
 
