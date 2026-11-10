@@ -16,3 +16,12 @@
 //   - cache: a byte-budgeted cache of decoded frames, with the fixed thread pool
 //     and step-boundary cancellation.
 //   - exif: metadata through the exiv2 C shim.
+
+pub const bitmap = @import("bitmap.zig");
+
+pub const Bitmap = bitmap.Bitmap;
+pub const Format = bitmap.Format;
+
+test {
+    _ = bitmap;
+}
