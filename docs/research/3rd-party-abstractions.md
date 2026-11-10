@@ -81,6 +81,55 @@ Zig layer becomes a wrapper around a C library, which is the opposite of the
 (glib, gio, gdk-pixbuf, cairo, pango, ... - present here, but a packaging promise)
 and to ~44k lines of generated bindings.
 
+## Measured, not argued
+
+Same input, same target, one machine (8-core Core Ultra 7 258V). Input: a
+4096x4096 RGB pattern - a 1-pixel checkerboard and 1-pixel stripes (maximum
+aliasing), a gradient and a radial zone plate - downscaled to 512x512 (8x).
+"Quality" is RMSE against the physically correct result: the 8x8 area average
+computed **in linear light**, converted back to sRGB. Lower is better.
+\`checkerboard_std\` is the spread inside the checkerboard corner, which must be
+flat; a high value is aliasing.
+
+| implementation | RMSE | max diff | checkerboard std |
+|---|---:|---:|---:|
+| \`imageops\` bilinear (what the skeleton ships) | **71.7** | 188 | **38.3** |
+| area prefilter in sRGB (decision 06 as written) | 46.4 | 61 | 0.0 |
+| **area prefilter in linear light** | **0.002** | 1 | 0.0 |
+| \`stb_image_resize2\` \`stbir_resize_uint8_srgb\` (Mitchell) | 3.6 | 93 | 0.02 |
+| libvips \`vips resize --kernel lanczos3\` | 45.6 | 74 | 0.0 |
+| libvips \`vips resize --kernel mitchell\` | 45.7 | 74 | 0.0 |
+| libvips \`vips reduce 8 8\` (box) | 46.4 | 78 | 0.01 |
+| libvips \`vips thumbnail\` (CLI) | 45.6 | 74 | 0.0 |
+| \`vipsthumbnail\` (CLI) | 45.6 | 74 | 0.0 |
+
+Wall time, one run, process start included: \`imageops\` bilinear 0.022 s, stb
+0.028 s, \`vips resize\` lanczos3 0.090 s, \`vips thumbnail\` 0.059 s,
+\`vipsthumbnail\` 0.086 s. The CLI numbers carry ~40 ms of libvips start-up; in
+process they would be closer.
+
+### What the numbers say
+
+1. **The dominant term is linear light, not the algorithm.** The sRGB-space box
+   and libvips' three resize paths all land at ~46 - the same gamma error. The
+   same box in linear light lands at 0.002. stb's \`_srgb\` entry point is the only
+   library path measured that applies the linear-light step.
+2. **The prefilter is the second term.** One-pass bilinear aliases badly (std 38.3
+   on a field that must be flat).
+3. **libvips does not beat a hand-rolled box here.** On a profile-less sRGB image
+   its \`resize\` and \`thumbnail\` resample the encoded values; you must convert
+   to linear first for the good result.
+4. **Speed is not the reason to hand-roll.** stb is within 30 % of the naive
+   bilinear, and libvips' CLI numbers are start-up-dominated.
+
+### Consequence
+
+- Decision 06's two-pass scaler is **not enough as written**: it must also do the
+  resampling in linear light, or it is no better than a plain box (46 vs 0.002).
+- With that step, a ~40-line Zig kernel matches the ideal on this test and is the
+  fastest of the group; a library is then a convenience, not a quality requirement.
+- If a library is preferred, stb's \`_srgb\` path is the one to take.
+
 ## Recommendation
 
 - **Adopt the format model**: zigimg's `PixelFormat` is the abstraction for the
