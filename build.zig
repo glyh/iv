@@ -47,8 +47,13 @@ pub fn build(b: *std.Build) void {
     // generator. See build/bindings.zig.
     const gtk = bindings.add(b, target, optimize);
 
-    // translate-c reads `jpeg_shim.h`, never `jpeglib.h`: the shim exists so
-    // that libjpeg's structs, and the setjmp its error path needs, stay in C.
+    // GL comes from libepoxy, because zig-gobject binds no GL; the JPEG shim
+    // exists to keep libjpeg's setjmp in C. docs/research/mvp-reachability.md
+    // records the measurements behind both.
+    const gl = cModule(b, target, optimize, .{
+        .header = "src/shell/gl.h",
+        .library = "epoxy",
+    });
     const jpeg_shim = cModule(b, target, optimize, .{
         .header = "src/core/decode/jpeg_shim.h",
         .source = "src/core/decode/jpeg_shim.c",
@@ -67,6 +72,7 @@ pub fn build(b: *std.Build) void {
                 .{ .name = "gtk", .module = gtk.module("gtk4") },
                 .{ .name = "gdk", .module = gtk.module("gdk4") },
                 .{ .name = "gio", .module = gtk.module("gio2") },
+                .{ .name = "gl", .module = gl },
                 .{ .name = "jpeg_shim", .module = jpeg_shim },
             },
         }),
@@ -80,7 +86,8 @@ pub fn build(b: *std.Build) void {
     run_step.dependOn(&run_cmd.step);
 
     // Tests live beside the code and stay display-free: the core's root module
-    // imports every core module, so it is the test root.
+    // imports every core module, so it is the test root. The shell is not in it,
+    // because anything that builds a window needs a display (decision 11).
     const core_tests = b.addTest(.{ .root_module = b.createModule(.{
         .root_source_file = b.path("src/core/root.zig"),
         .target = target,
@@ -89,4 +96,13 @@ pub fn build(b: *std.Build) void {
     }) });
     const test_step = b.step("test", "Run the tests");
     test_step.dependOn(&b.addRunArtifact(core_tests).step);
+
+    // The display check of decision 11: render a fixture under Xvfb, read two
+    // pixels back, and report.
+    const check_cmd = b.addSystemCommand(&.{"xvfb-run"});
+    check_cmd.addArg("-a");
+    check_cmd.addArtifactArg(exe);
+    check_cmd.addArgs(&.{ "--check", "test/fixtures/quadrants.jpg" });
+    const check_step = b.step("check", "Render a fixture under Xvfb and verify the pixels");
+    check_step.dependOn(&check_cmd.step);
 }

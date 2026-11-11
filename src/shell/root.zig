@@ -44,16 +44,17 @@
 //!
 //! # Build (decision 10)
 //!
-//! A pinned `zig-gobject` revision, its generator run as a build step over the
-//! installed GIR files, and the resulting modules imported by name. That step
-//! needs `gobject-introspection` on the build machine. The recipe is in
+//! A pinned `zig-gobject` revision, its generator run by `tools/gen-bindings.sh`
+//! into `bindings/`, and the resulting modules imported by name. Zig resolves
+//! dependencies before `build.zig` runs, so that generation is a bootstrap step
+//! rather than part of `zig build`. The recipe is in
 //! `docs/research/zig-gobject.md`.
 //!
 //! TODO: what the shell still needs, in the order it is worth building:
-//!   - the application: `GtkApplication`, one window, and the `iv <path>`
-//!     argument (ticket 006).
-//!   - the viewport: the `Viewport` interface and its `GtkGLArea`
-//!     implementation (ticket 008).
+//!   - the application: a menu, a file dialog, keyboard handling, and opening a
+//!     path from the command line is done (ticket 006).
+//!   - the viewport: zoom and pan, mipmaps, and the `Viewport` interface once a
+//!     second implementation exists (ticket 008).
 //!   - GL entry points: settled. `zig-gobject` has no `GL-1.0` module because
 //!     the installed typelib is a stub with no functions in it, so the viewport
 //!     reaches GL by `translate-c` over `epoxy/gl.h` and links `libepoxy`.
@@ -63,3 +64,19 @@
 //!     `docs/research/mvp-reachability.md`.
 //!   - display-free tests run under `xvfb-run`; GTK4 has no offscreen backend
 //!     (decision 12).
+
+const std = @import("std");
+const core = @import("../core/root.zig");
+
+pub const app = @import("app.zig");
+pub const viewport = @import("viewport.zig");
+
+pub const Options = app.Options;
+
+pub fn run(options: Options, image: *const core.Bitmap, argv: []const [*:0]const u8) u8 {
+    return app.run(options, image, argv);
+}
+
+test {
+    _ = std;
+}
