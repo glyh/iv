@@ -18,22 +18,25 @@ pub const Filter = enum {
     bilinear,
 };
 
-/// Largest size that fits `max_w x max_h` while keeping the aspect ratio. Zero on
-/// either side means there is no room, and the answer is 0x0 - it used to return
-/// a 0x1 or 1x0 bitmap, which is not a size anything can use.
-pub fn fitWithin(width: u32, height: u32, max_w: u32, max_h: u32) Size {
-    if (width == 0 or height == 0 or max_w == 0 or max_h == 0) return .{ .w = 0, .h = 0 };
-    if (width <= max_w and height <= max_h) return .{ .w = width, .h = height };
+/// Largest size that fits inside `bounds` while keeping the aspect ratio. Zero
+/// on either side means there is no room, and the answer is 0x0 - it used to
+/// return a 0x1 or 1x0 bitmap, which is not a size anything can use.
+///
+/// `bounds` and not `viewport`: a viewport is the shell's word for where the
+/// result is drawn, and the core does not know about one.
+pub fn fitWithin(image: Size, bounds: Size) Size {
+    if (image.w == 0 or image.h == 0 or bounds.w == 0 or bounds.h == 0) return .{ .w = 0, .h = 0 };
+    if (image.w <= bounds.w and image.h <= bounds.h) return image;
 
     // u64: the product of two u32s does not fit a u32, and a cast back that
     // overflows would panic.
-    const scaled_h = @as(u64, height) * max_w / width;
-    if (scaled_h > 0 and scaled_h <= max_h) return .{ .w = max_w, .h = @intCast(scaled_h) };
+    const scaled_h = @as(u64, image.h) * bounds.w / image.w;
+    if (scaled_h > 0 and scaled_h <= bounds.h) return .{ .w = bounds.w, .h = @intCast(scaled_h) };
 
-    const scaled_w = @as(u64, width) * max_h / height;
+    const scaled_w = @as(u64, image.w) * bounds.h / image.h;
     return .{
-        .w = @max(1, @as(u32, @intCast(@min(scaled_w, @as(u64, max_w))))),
-        .h = max_h,
+        .w = @max(1, @as(u32, @intCast(@min(scaled_w, @as(u64, bounds.w))))),
+        .h = bounds.h,
     };
 }
 
@@ -227,17 +230,17 @@ fn gray2x2(v: [4]u8) Bitmap {
 }
 
 test "fitWithin keeps the aspect ratio and never upscales" {
-    try testing.expectEqualDeep(Size{ .w = 100, .h = 50 }, fitWithin(100, 50, 200, 200));
-    try testing.expectEqual(@as(u32, 100), fitWithin(4000, 2000, 100, 100).w);
-    try testing.expectEqual(@as(u32, 50), fitWithin(4000, 2000, 100, 100).h);
-    try testing.expectEqual(@as(u32, 100), fitWithin(100, 400, 100, 100).h);
+    try testing.expectEqualDeep(Size{ .w = 100, .h = 50 }, fitWithin(.{ .w = 100, .h = 50 }, .{ .w = 200, .h = 200 }));
+    try testing.expectEqual(@as(u32, 100), fitWithin(.{ .w = 4000, .h = 2000 }, .{ .w = 100, .h = 100 }).w);
+    try testing.expectEqual(@as(u32, 50), fitWithin(.{ .w = 4000, .h = 2000 }, .{ .w = 100, .h = 100 }).h);
+    try testing.expectEqual(@as(u32, 100), fitWithin(.{ .w = 100, .h = 400 }, .{ .w = 100, .h = 100 }).h);
 }
 
 test "fitWithin with no room on either side is empty" {
-    try testing.expectEqualDeep(Size{ .w = 0, .h = 0 }, fitWithin(100, 50, 0, 100));
-    try testing.expectEqualDeep(Size{ .w = 0, .h = 0 }, fitWithin(100, 50, 100, 0));
-    try testing.expectEqualDeep(Size{ .w = 0, .h = 0 }, fitWithin(0, 50, 100, 100));
-    try testing.expectEqualDeep(Size{ .w = 0, .h = 0 }, fitWithin(100, 0, 100, 100));
+    try testing.expectEqualDeep(Size{ .w = 0, .h = 0 }, fitWithin(.{ .w = 100, .h = 50 }, .{ .w = 0, .h = 100 }));
+    try testing.expectEqualDeep(Size{ .w = 0, .h = 0 }, fitWithin(.{ .w = 100, .h = 50 }, .{ .w = 100, .h = 0 }));
+    try testing.expectEqualDeep(Size{ .w = 0, .h = 0 }, fitWithin(.{ .w = 0, .h = 50 }, .{ .w = 100, .h = 100 }));
+    try testing.expectEqualDeep(Size{ .w = 0, .h = 0 }, fitWithin(.{ .w = 100, .h = 0 }, .{ .w = 100, .h = 100 }));
 }
 
 test "nearest scale up is replication" {
