@@ -1,0 +1,123 @@
+# zig-gobject: the binding the shell reaches GTK through
+
+Researched 2026-11-11 on this machine (Zig 0.17.0, GTK 4.24.1, GNOME-era GIR
+data). Every claim below was run, not recalled.
+
+## The question
+
+Decision 12 moves the shell to GTK4. `gtk4-zig-interop.md` measured the
+`translate-c` route, and it works. This document asks whether an existing,
+maintained Zig binding is the better route - typed signals and classes instead
+of hand-written wrappers - and what adopting one costs.
+
+## 1. There is one maintained candidate
+
+| project | last commit | verdict |
+|---|---|---|
+| [ianprime0509/zig-gobject](https://github.com/ianprime0509/zig-gobject) | 2026-10-13, `feat: update to Zig v0.17.0 and support GNOME 51` | the only live one |
+| Diegovsky/gintro | 2025-01-24, "Auto-commit before backup" | stale |
+| paveloom-z/zig-gtk4 | 2023-01-20, "Create a stab of the project" | dead |
+
+zig-gobject is 150 stars, BSD-0, declares `minimum_zig_version = "0.17.0"`, and
+its README says the generator and the generated bindings are tested on Zig
+0.17.0. It generates from GObject-introspection data, so its coverage is
+whatever the installed GIR files describe rather than a hand-picked class list.
+
+## 2. It does not work out of the box here
+
+Two blockers, both found by running it:
+
+- **The generator needs GIR XML, and two namespaces have only typelibs.**
+  `cairo-1.0.gir` and `freetype2-2.0.gir` are absent from `/usr/share/gir-1.0/`;
+  `cairo` and `freetype2` ship no GIR, and the typelibs come from
+  `gobject-introspection-runtime`. Without them the generator stops with
+  `error: no GIR file found for cairo-1.0`.
+- **The tool that turns a typelib back into a GIR was not installed.**
+  `g-ir-generate` lives in `gobject-introspection`, which was not installed.
+- **The released bindings cannot be used.** v0.3.2 shipped 2026-07-19, before
+  the Zig 0.17 commit of 2026-10-13, so the release artifacts target an older
+  Zig. The bindings have to be generated locally.
+
+## 3. What it takes, measured
+
+```
+$ sudo pacman -S gobject-introspection     # 3 new packages, no upgrades
+$ g-ir-generate /usr/lib/girepository-1.0/cairo-1.0.typelib     > /tmp/girs/cairo-1.0.gir
+$ g-ir-generate /usr/lib/girepository-1.0/freetype2-2.0.typelib > /tmp/girs/freetype2-2.0.gir
+$ cd zig-gobject && zig build codegen \
+    -Dgir-files-path=/usr/share/gir-1.0 \
+    -Dgir-files-path=/tmp/girs \
+    -Dmodules=Gtk-4.0
+```
+
+8.9 MB of bindings land in `zig-out/bindings`, exposing `glib2`, `gobject2`,
+`gio2`, `gmodule2`, `gdk4`, `gsk4`, `gtk4`, `graphene1`, `cairo1`, `pango1`,
+`pangocairo1`, `gdkpixbuf2`, `harfbuzz0` and `freetype22`.
+
+Two gotchas worth recording:
+
+- `-Dgir-files-path` takes **repeated flags**. `-Dgir-files-path=a,b` is passed
+  through as the single string `--gir-dir=a,b`, and the generator then reports
+  `no GIR file found for Gtk-4.0`.
+- A consumer's `build.zig.zon` fingerprint must be the value Zig computes; a
+  made-up one is rejected with the expected value in the error message.
+
+## 4. End to end
+
+The upstream example builds against the generated bindings, and a 20-line probe
+written for iv does too:
+
+```zig
+const app = gtk.Application.new("org.example.IvProbe", .{});
+_ = gio.Application.signals.activate.connect(app, ?*anyopaque, &activate, null, .{});
+const status = gio.Application.run(app.as(gio.Application), ...);
+```
+
+```zig
+// inside activate:
+const win = gtk.ApplicationWindow.new(app);
+const area = gtk.GLArea.new();          // returns *gtk.GLArea, not an optional
+gtk.Window.setChild(win.as(gtk.Window), area.as(gtk.Widget));
+```
+
+Run under `xvfb-run`:
+
+```
+gtk.GLArea.new -> gtk4.GLArea@23ae7030
+window shown; quitting
+g_application_run -> 0
+```
+
+So the binding reaches `GtkGLArea`, the widget the viewport needs, and the
+signal API is typed - `gtk.GLArea.signals.render`,
+`gio.Application.signals.activate` - connected with a `user_data` pointer
+instead of a raw `g_signal_connect` and a `GCallback` cast.
+
+## 5. How iv consumes it
+
+Not from a release artifact (section 2). A zig-gobject revision is pinned and
+its generator runs as part of `zig build`, so the bindings match the GTK that
+is installed and no generated code is committed to this repository.
+
+## 6. What this changes about the Qt comparison
+
+ADR 0007's first argument was that GTK4 has no binding layer and therefore
+cannot reproduce the `libqt6zig` problem. The shell does have a binding, so the
+argument has to be stated correctly instead:
+
+- `libqt6zig` is a **hand-curated class list** - 96.4% of QtWidgets, 85.4% of
+  QtGui - over a **C++** library, and its generator lives upstream, so a class
+  it misses is a fork or a wait.
+- `zig-gobject` generates from the **installed GIR data**, which
+  `g-ir-scanner` derives from the library's own public API, so its coverage is
+  complete by construction for whatever the system provides - the property
+  `translate-c` also has - and there is **no C++** anywhere in the picture.
+
+## Not established
+
+- Whether the generated bindings compile against other GIR versions: only GTK
+  4.24.1's data was used.
+- The cold-cache cost of the codegen step: not measured.
+- GL entry points. Only `GL-1.0.typelib` is installed, with no `.gir`, so the
+  `gl*` calls the viewport needs are still reached another way - a
+  `translate-c` over `epoxy/gl.h`, or `GL/gl.h` plus `libGL`.
