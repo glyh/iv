@@ -54,10 +54,10 @@
 //!     argument (ticket 006).
 //!   - the viewport: the `Viewport` interface and its `GtkGLArea`
 //!     implementation (ticket 008).
-//!   - GL entry points. The binding has no `GL-1.0` module - only its typelib
-//!     is installed, with no `.gir` to generate from - so the `gl*` calls the
-//!     viewport needs come from elsewhere: a `translate-c` over `epoxy/gl.h`
-//!     (GTK already links `libepoxy`), or over `GL/gl.h` with `libGL`. Which
-//!     to use is ticket 008's decision.
+//!   - GL entry points: settled. `zig-gobject` has no `GL-1.0` module because
+//!     the installed typelib is a stub with no functions in it, so the viewport
+//!     reaches GL by `translate-c` over `epoxy/gl.h` and links `libepoxy`. The
+//!     context GTK hands out is **OpenGL ES 3.2**, so shaders are GLSL ES
+//!     (`#version 300 es`). Measured in `docs/research/mvp-reachability.md`.
 //!   - display-free tests run under `xvfb-run`; GTK4 has no offscreen backend
 //!     (decision 12).
