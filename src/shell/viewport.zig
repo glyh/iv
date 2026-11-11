@@ -16,6 +16,9 @@ const Bitmap = core.Bitmap;
 
 // The shader sources live beside this file as GLSL, so they are highlighted
 // and edited as GLSL rather than as escaped string literals.
+// TODO: Zig-authored shaders compiled to SPIR-V were spiked and work, but the
+// load path is Mesa-only and buys nothing for a quad; they stay deferred until
+// that matures (decision 12, docs/research/zig-shaders-spirv.md).
 const VERT = @embedFile("shaders/image.vert");
 const FRAG = @embedFile("shaders/image.frag");
 
