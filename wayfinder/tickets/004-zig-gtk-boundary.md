@@ -3,7 +3,7 @@ id: 004
 title: The Zig-GTK boundary and the shell's shape
 labels: [wayfinder:grilling]
 status: open
-assignee:
+assignee: glyh
 blocked_by: []
 ---
 
