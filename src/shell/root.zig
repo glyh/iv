@@ -51,10 +51,11 @@
 //! it runs. The measurements are in `docs/research/zig-gobject.md`.
 //!
 //! TODO: what the shell still needs, in the order it is worth building:
-//!   - the application: a menu, a file dialog, keyboard handling, and opening a
-//!     path from the command line is done (ticket 006).
+//!   - the application: opening a path from the command line works; a menu, a
+//!     file dialog and keyboard handling are not specified yet (the map's
+//!     *Not yet specified*).
 //!   - the viewport: zoom and pan, mipmaps, and the `Viewport` interface once a
-//!     second implementation exists (ticket 008).
+//!     second implementation exists (ticket 014).
 //!   - GL entry points: settled. `zig-gobject` has no `GL-1.0` module because
 //!     the installed typelib is a stub with no functions in it, so the viewport
 //!     reaches GL by `translate-c` over `src/shell/gl.h`, which includes
