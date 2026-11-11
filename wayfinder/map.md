@@ -41,8 +41,8 @@ dev headers resolves under pkg-config (`pkg-config --modversion gtk4`), and
 `zig translate-c` consumes the whole `gtk/gtk.h` with zero errors; the measured
 recipe is `docs/research/gtk4-zig-interop.md`. The shell reaches GTK through
 **zig-gobject** instead: `gobject-introspection` 1.86.0-2 is installed, and
-`cairo-1.0.gir` and `freetype2-2.0.gir` were regenerated from their typelibs
-because only the typelibs ship (`docs/research/zig-gobject.md`). GTK4 has **no offscreen GDK
+`cairo-1.0.gir` and `freetype2-2.0.gir` are regenerated from their typelibs by
+the build, because only the typelibs ship (`docs/research/zig-gobject.md`). GTK4 has **no offscreen GDK
 backend** — `GDK_BACKEND=offscreen` answers "No such backend" — so anything
 that needs a display runs under `xvfb-run`.
 

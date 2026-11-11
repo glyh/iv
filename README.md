@@ -10,13 +10,20 @@ are in `docs/design/`, the ADRs in `docs/adr/`, and the vocabulary in
 
 ## Build
 
+`zig build` is the only build entry point: it generates the GTK bindings from
+the GIR files on the machine and compiles everything in one invocation.
+
 ```sh
-zig build        # build
-zig build test   # run the tests
-zig build run    # run the placeholder CLI
+zig build                    # build
+zig build test               # run the tests, no display needed
+zig build run                # open the committed fixture
+zig build run -Dfile=FILE    # open FILE
+zig build check              # render a fixture under Xvfb and verify the pixels
 ```
 
-Requires Zig 0.17.0.
+Requirements: Zig 0.17.0, pkg-config, the GTK4 development files,
+`gobject-introspection` (for `g-ir-generate`), libjpeg-turbo, libepoxy, and
+`xvfb-run` for `zig build check`.
 
 ## Licence
 

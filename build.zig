@@ -1,4 +1,5 @@
 const std = @import("std");
+const bindings = @import("build/bindings.zig");
 
 /// What `cModule` needs to build one C-backed module.
 const CModule = struct {
@@ -42,9 +43,12 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // The GTK bindings, generated into the build cache by the pinned
+    // generator. See build/bindings.zig.
+    const gtk = bindings.add(b, target, optimize);
+
     // translate-c reads `jpeg_shim.h`, never `jpeglib.h`: the shim exists so
     // that libjpeg's structs, and the setjmp its error path needs, stay in C.
-    // The header and docs/research/mvp-reachability.md carry the reasoning.
     const jpeg_shim = cModule(b, target, optimize, .{
         .header = "src/core/decode/jpeg_shim.h",
         .source = "src/core/decode/jpeg_shim.c",
@@ -59,6 +63,12 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("src/main.zig"),
             .target = target,
             .optimize = optimize,
+            .imports = &.{
+                .{ .name = "gtk", .module = gtk.module("gtk4") },
+                .{ .name = "gdk", .module = gtk.module("gdk4") },
+                .{ .name = "gio", .module = gtk.module("gio2") },
+                .{ .name = "jpeg_shim", .module = jpeg_shim },
+            },
         }),
     });
     b.installArtifact(exe);
