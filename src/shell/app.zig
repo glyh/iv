@@ -76,6 +76,13 @@ pub fn run(options: Options, image: *const core.Bitmap, argv: []const [*:0]const
 
     if (!options.check) return @intCast(status);
 
+    // Anything the viewport recorded while drawing, before the pixels are
+    // judged: a blank frame and a shader that did not compile look the same
+    // from here otherwise.
+    if (s.view.last_error) |message| {
+        std.debug.print("check: the viewport reported: {s}\n", .{message});
+    }
+
     // test/fixtures/quadrants.jpg is red on the left half and blue on the right.
     const left_ok = s.left[0] > 120 and s.left[2] < 120;
     const right_ok = s.right[2] > 120 and s.right[0] < 120;

@@ -132,6 +132,20 @@ pub const GlViewport = struct {
         gl.glLinkProgram(self.program);
         gl.glDeleteShader(vertex_shader);
         gl.glDeleteShader(fragment_shader);
+
+        // A program that did not link draws nothing, and the window would just
+        // stay the clear colour with no explanation. Say so here, while the GL
+        // error state the message comes from is still around.
+        var linked: c_int = 0;
+        gl.glGetProgramiv(self.program, gl.GL_LINK_STATUS, &linked);
+        if (linked == 0) {
+            var log: [1024]u8 = @splat(0);
+            var length: c_int = 0;
+            gl.glGetProgramInfoLog(self.program, @intCast(log.len), &length, &log);
+            std.debug.print("iv: the viewport's shader program did not link: {s}\n", .{log[0..@intCast(length)]});
+            self.last_error = "the shader program did not link";
+        }
+
         self.scale_uniform = gl.glGetUniformLocation(self.program, "scale");
 
         gl.glGenTextures(1, &self.texture);
@@ -201,6 +215,17 @@ fn compile(kind: c_uint, source: [*:0]const u8) c_uint {
     var text: [*c]const u8 = source;
     gl.glShaderSource(shader, 1, &text, null);
     gl.glCompileShader(shader);
+
+    // The compile log is the useful one; a shader that fails here takes the
+    // program's link down with it, and build() reports that.
+    var compiled: c_int = 0;
+    gl.glGetShaderiv(shader, gl.GL_COMPILE_STATUS, &compiled);
+    if (compiled == 0) {
+        var log: [1024]u8 = @splat(0);
+        var length: c_int = 0;
+        gl.glGetShaderInfoLog(shader, @intCast(log.len), &length, &log);
+        std.debug.print("iv: a viewport shader did not compile: {s}\n", .{log[0..@intCast(length)]});
+    }
     return shader;
 }
 
