@@ -56,8 +56,10 @@
 //!     implementation (ticket 008).
 //!   - GL entry points: settled. `zig-gobject` has no `GL-1.0` module because
 //!     the installed typelib is a stub with no functions in it, so the viewport
-//!     reaches GL by `translate-c` over `epoxy/gl.h` and links `libepoxy`. The
-//!     context GTK hands out is **OpenGL ES 3.2**, so shaders are GLSL ES
-//!     (`#version 300 es`). Measured in `docs/research/mvp-reachability.md`.
+//!     reaches GL by `translate-c` over `epoxy/gl.h` and links `libepoxy`.
+//!     `GtkGLArea` defaults to GLES, so the viewport asks for desktop GL with
+//!     `setAllowedApis(.{ .gl = true, .gles = false })`: that is **GL 4.6 core
+//!     and GLSL 4.60** on this machine, on the real GPU. Measured in
+//!     `docs/research/mvp-reachability.md`.
 //!   - display-free tests run under `xvfb-run`; GTK4 has no offscreen backend
 //!     (decision 12).

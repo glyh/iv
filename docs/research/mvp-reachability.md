@@ -99,11 +99,50 @@ Three build facts worth carrying:
 - A `build.zig.zon` path dependency must be relative to the build root; an
   absolute path is rejected.
 
-## 4. What is still unverified
+## 4. Which GL, and which shader API
+
+The end-to-end run above reported OpenGL ES 3.2, because that is what
+`GtkGLArea` allows by default. Two things correct that picture, both measured.
+
+**ES 3.2 is not an old version.** It is the newest OpenGL ES; there is no ES 4.
+Desktop GL goes further, to 4.6, and GTK exposes the choice as one call:
+
+```zig
+gtk.GLArea.setAllowedApis(area, .{ .gl = true, .gles = false });
+```
+
+The same probe then reports:
+
+```
+api: gl=true gles=false
+GL_VERSION   = 4.6 (Core Profile) Mesa 26.2.6-arch1.1
+GLSL_VERSION = 4.60
+GL_RENDERER  = Mesa Intel(R) Graphics (LNL)
+```
+
+So the viewport gets **desktop GL 4.6 core and GLSL 4.60**, and it runs on the
+real GPU rather than a software rasteriser. `GLAPI` is a packed struct of two
+flags, so both APIs can be offered at once; iv asks for desktop GL.
+
+**GTK's sanctioned shader path is `GtkGLArea`.** GSK does have a shader API -
+`GskGLShader` and `GskGLShaderNode` - but it is deprecated:
+
+```
+$ grep -n 'DEPRECATED_IN_4_16' /usr/include/gtk-4.0/gsk/gskglshader.h
+typedef struct _GskGLShader GskGLShader GDK_DEPRECATED_TYPE_IN_4_16_FOR(GtkGLArea);
+```
+
+`FOR(GtkGLArea)` is the deprecation's own instruction: use `GtkGLArea` instead.
+There is no higher-level shader API to move to - the probe is already on the one
+GTK points at, and GLSL is written by hand there.
+
+## 5. What is still unverified
 
 - PNG, WebP and the other backends: not spiked.
 - Mipmaps and trilinear sampling (`glGenerateMipmap`): the probe samples with
   `GL_LINEAR` only.
+- The desktop-GL path has only been asked for its version string; the textured
+  quad was drawn on the ES context.
 - Surviving a window resize in a real session: the probe renders once and quits.
 - Colour management (lcms2) and the scaler: not on this path.
 
