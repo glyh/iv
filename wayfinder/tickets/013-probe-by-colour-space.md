@@ -2,7 +2,7 @@
 id: 013
 title: Probe without starting decompression, and pick the format by colour space
 labels: [wayfinder:task]
-status: open
+status: closed
 assignee: glyh
 blocked_by: []
 ---
@@ -56,3 +56,38 @@ Both are fixed by reporting the colour space and reading only the header:
   `rgb888`, and `cmyk.jpg` returns `UnsupportedColorSpace`.
 - The colour tests measure a patch mean against the expected colour by squared
   RGB distance, not per-channel thresholds on two of three channels.
+
+## Answer
+
+**The probe reads the header and stops, and the format is chosen by colour
+space.**
+
+`iv_jpeg_probe` no longer calls `jpeg_start_decompress`. Nothing the caller
+needs comes later: `jpeg_read_header` already sets `out_color_space` from the
+file's own colour space, and the shim never requests a conversion. Measured on
+the same 600x640 photo, 400 runs each:
+
+| | before | after |
+|---|---|---|
+| probe | 2.994 ms | **0.002 ms** |
+| decode | 3.408 ms | 3.306 ms |
+| the two calls together | 6.402 ms | **3.308 ms** |
+
+A 48% cut. Opening the file twice turned out not to matter - it is two
+microseconds - while the second `jpeg_start_decompress` was most of a decode.
+
+The shim reports `enum iv_jpeg_color_space` (gray, rgb, other) instead of a
+component count, and `jpeg.zig` keys `formatFor` on that. `other` covers CMYK
+and anything libjpeg could not identify, and it is refused with
+`error.UnsupportedColorSpace`. The `else` arm is what makes it safe to extend: a
+colour space added on the C side without a case in Zig is refused, not
+mislabelled.
+
+`iv_jpeg_decode` re-derives the colour space after it starts and returns
+`IV_JPEG_BAD_FILE` when the component count that arrives does not match what the
+caller's format implies, so the two calls cannot disagree into a buffer
+overrun.
+
+The colour tests now take a patch mean and compare by squared RGB distance
+against the expected colour, instead of two per-channel thresholds that left
+the green channel unconstrained.

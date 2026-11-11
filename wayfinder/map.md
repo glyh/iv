@@ -75,6 +75,12 @@ settled immediately before a slice. `wayfinder/README.md` has the operations;
   move to GTK4. See ticket 011.
 - The Zig–GTK boundary and the shell's shape — the shell reaches GTK through
   `zig-gobject`; the rules live in `src/shell/root.zig`. See ticket 004.
+- Store decoded pixels in the backend's native format — the JPEG backend keeps
+  the file's colour space; CMYK is refused rather than mislabelled. See
+  ticket 012.
+- Probe without starting decompression, and pick the format by colour space —
+  the probe reads the header only, and the format is keyed on the colour space
+  rather than a channel count. See ticket 013.
 
 ## Not yet specified
 

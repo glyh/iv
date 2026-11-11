@@ -42,6 +42,15 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // translate-c reads `jpeg_shim.h`, never `jpeglib.h`: the shim exists so
+    // that libjpeg's structs, and the setjmp its error path needs, stay in C.
+    // The header and docs/research/mvp-reachability.md carry the reasoning.
+    const jpeg_shim = cModule(b, target, optimize, .{
+        .header = "src/core/decode/jpeg_shim.h",
+        .source = "src/core/decode/jpeg_shim.c",
+        .library = "jpeg",
+    });
+
     // One executable. The core is a subdirectory of it, not a separate package,
     // so there is no library module to export.
     const exe = b.addExecutable(.{
@@ -60,13 +69,14 @@ pub fn build(b: *std.Build) void {
     const run_step = b.step("run", "Run iv");
     run_step.dependOn(&run_cmd.step);
 
-    // Tests live beside the code. The core's root module imports every core
-    // module, so it is the test root; main.zig has no tests and is not one.
-    const tests = b.addTest(.{ .root_module = b.createModule(.{
+    // Tests live beside the code and stay display-free: the core's root module
+    // imports every core module, so it is the test root.
+    const core_tests = b.addTest(.{ .root_module = b.createModule(.{
         .root_source_file = b.path("src/core/root.zig"),
         .target = target,
         .optimize = optimize,
+        .imports = &.{.{ .name = "jpeg_shim", .module = jpeg_shim }},
     }) });
     const test_step = b.step("test", "Run the tests");
-    test_step.dependOn(&b.addRunArtifact(tests).step);
+    test_step.dependOn(&b.addRunArtifact(core_tests).step);
 }

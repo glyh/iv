@@ -2,7 +2,7 @@
 id: 012
 title: Store decoded pixels in the backend's native format
 labels: [wayfinder:task]
-status: open
+status: closed
 assignee: glyh
 blocked_by: []
 ---
@@ -42,3 +42,27 @@ What the slice has to do:
   refused with a distinct error rather than `BadFile`.
 - `zig build check` reads the colour fixture back through the viewport, which
   uploads RGB rather than RGBA.
+
+## Answer
+
+**Built the way decision 04 already required: the backend never converts.**
+
+The shim requests no colour space, so libjpeg returns the file's own - 1
+component for a grayscale JPEG, 3 for a colour one. It reports
+`output_components`, and `jpeg.zig` maps that to a `Format` before allocating,
+so the buffer is sized by the format it will be labelled with. Scanlines are
+read straight into the `Bitmap`'s rows, which are already `w * comps` bytes:
+no intermediate row buffer, no per-pixel loop, and one pass over the file
+instead of two.
+
+The CMYK trap is closed by refusing it. Four components is CMYK (libjpeg
+supports YCCK => CMYK but not CMYK => RGB), it has no `Format`, and `decode`
+returns `error.UnsupportedColorSpace` rather than mislabelling it `rgba8888`.
+`test/fixtures/cmyk.jpg` pins that.
+
+The viewport grew the other two formats: `GL_R8` with a swizzle, so a gray
+texture still samples as `(r, r, r, 1)`, and `GL_RGB8`.
+
+Three build-time checks came with it: `pub` stays at offset 0 in the error
+wrapper, the handler's type matches `jpeg_error_mgr.error_exit`, and the
+component-count-to-`Format` mapping agrees with `Format.bytesPerPixel`.
