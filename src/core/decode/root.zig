@@ -3,6 +3,10 @@
 //! TODO: decision 03 asks for a registry of backends, each declaring the
 //! formats it claims and probing the first bytes. With a single backend a
 //! direct call is honest; the registry is ticket 003.
+//!
+//! TODO: nothing applies EXIF orientation yet, so a photo whose orientation tag
+//! is not 1 displays sideways. Ticket 010 settles it; ADR 0003 put the exiv2
+//! shim in the core for exactly this.
 
 const std = @import("std");
 const bitmap = @import("../bitmap.zig");
