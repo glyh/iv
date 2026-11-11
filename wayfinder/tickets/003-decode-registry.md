@@ -32,5 +32,5 @@ bullet.
 
 - `zig build test` covers the three probe outcomes and the JPEG fixture.
 - A caller goes from a `[]const u8` file image to a `Bitmap` in one call,
-  with no Qt and no display.
+  with no UI toolkit and no display.
 - The decode entry points carry the ticket-002 contract in their doc comments.

@@ -15,7 +15,7 @@ slice.
 
 - Ask the decoder for a size that fits the window, per ticket 002's contract;
   never decode whole and shrink.
-- Say where the decode runs. Synchronous on the Qt thread is acceptable for the
+- Say where the decode runs. Synchronous on the GTK main thread is acceptable for the
   first image, but decision 08 puts the pool in the core and rejects
   shell-owned threads, so either the core gains its async entry point here or
   the blocking decode is recorded as an accepted first-slice compromise.
@@ -30,6 +30,6 @@ slice.
 ## Done when
 
 - A committed JPEG fixture appears fitted to the window, shown by an offscreen
-  `grabFramebuffer()` check or by a hand run with the evidence recorded.
+  `xvfb-run` check or by a hand run with the evidence recorded.
 - A truncated or non-image file produces a message and the app stays up.
 - `zig build test` still covers everything that needs no display.

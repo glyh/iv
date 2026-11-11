@@ -2,7 +2,7 @@
 id: 005
 title: Install Qt Shader Tools (qsb)
 labels: [wayfinder:task]
-status: open
+status: closed
 assignee:
 blocked_by: []
 ---
@@ -17,7 +17,9 @@ ticket (008) cannot start without it.
 `pacman -S qt6-shadertools`. This is AFK if that runs without a prompt;
 otherwise it hands the human the single command.
 
-## Done when
+## Answer
 
-- `qsb --version` reports the version on this machine.
-- The build-time dependency and its version are recorded in the map's Notes.
+**Moot.** Decision 12 moved the shell to GTK4 and the viewport to `GtkGLArea`
+on OpenGL, so shaders are GLSL compiled in the shell's own GL context. There is
+no `.qsb` step, `qt6-shadertools` is not a build dependency, and ticket 008 no
+longer waits on this.

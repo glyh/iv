@@ -2,7 +2,7 @@
 id: 011
 title: How the shell gets a QRhiWidget the binding does not have
 labels: [wayfinder:grilling]
-status: open
+status: closed
 assignee:
 blocked_by: []
 ---
@@ -23,17 +23,27 @@ Settle how it gets one:
 
 - **Generate the missing bindings.** libqt6zig is a generator; adding
   `QRhiWidget` may be a supported extension rather than a fork. Find out what
-  its generator needs, and whether the result can still be a pinned URL+hash —
+  its generator needs, and whether the result can still be a pinned URL+hash -
   the only dependency form Zig 0.17 accepts at build-script level.
 - **Hand-written bindings plus one C++ translation unit.** `QRhiWidget` is
   subclassed to implement `initialize()` and `render()`, which means C++ of
   ours: exactly what ADR 0001 forbids ("no `Q_OBJECT`, no moc, no C++
   subclass of our own"). If that is the answer, ADR 0001 is amended or a new
   ADR records why, rather than being quietly broken.
-- **Reopen decision 12 for the viewport only** — for example the
+- **Reopen decision 12 for the viewport only** - for example the
   `QGraphicsScene` fallback decision 12 already names as the replaceable
-  alternative behind `Viewport` — keeping the Qt Widgets shell.
+  alternative behind `Viewport` - keeping the Qt Widgets shell.
 
 This is the first thing on the critical path that the thirteen design documents
 do not already answer, and it blocks 008, which blocks the destination slice
 009.
+
+## Answer
+
+**Dissolved.** The premise was that the shell reaches Qt through `libqt6zig`,
+so a class the binding lacks has to be generated or shimmed. Decision 12 no
+longer reaches Qt: the shell is GTK4, reached by `translate-c`, so there is no
+binding and no coverage gap to close. `docs/research/gtk4-zig-interop.md`
+records the measurements, including that neither toolkit offers app-owned
+Vulkan as a public, non-deprecated path - which is why the viewport is OpenGL.
+Ticket 008 no longer waits on this.
