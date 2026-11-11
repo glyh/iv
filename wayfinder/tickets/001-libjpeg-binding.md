@@ -2,7 +2,7 @@
 id: 001
 title: How Zig binds libjpeg-turbo, and where setjmp lives
 labels: [wayfinder:prototype]
-status: open
+status: closed
 assignee:
 blocked_by: []
 ---
@@ -45,3 +45,30 @@ written) rather than quietly ignored.
 - `build.zig` carries the include-path and linkage recipe as a comment
   (decision 10), and the cold build time is in the answer.
 - The answer names the route and why, so tickets 003 and 010 can follow it.
+
+## Answer
+
+**A C shim owns the `setjmp`; it is the only frame in this project that may hold
+a landing pad.**
+
+libjpeg reports every failure by calling `jpeg_error_mgr.error_exit`, whose
+default implementation calls `exit()` and whose conventional replacement
+`longjmp`s. Zig has no `setjmp` and cannot gain one soundly: the language has no
+"returns twice", so the optimiser may keep a local in a register across the
+call and hand back a stale value (ziglang/zig#1656 is the upstream ruling,
+#21810 a reproduction; measured in `docs/research/mvp-reachability.md`).
+
+So `src/core/decode/jpeg_shim.c` owns the pair. It exposes two plain functions,
+and `translate-c` reads `jpeg_shim.h` - never `jpeglib.h` - so libjpeg's structs
+stay in C and no Zig code can install the handler. The route decodes
+`test/fixtures/quadrants.jpg` as 32x24 `rgb888`, and returns `error.BadFile` for
+`test/fixtures/broken.jpg`; both are asserted in `jpeg.zig`'s tests.
+
+Three build-time assertions came with it, each checked by breaking it: the
+error wrapper's `pub` member stays at offset 0, the handler's type matches the
+field it is stored in, and the compiler refuses a mismatched handler signature.
+
+The shim needs no include path or extra link flag beyond `-ljpeg`, so decision
+10's recipe is the plain `addTranslateC` plus `linkSystemLibrary`; the module
+shape is `cModule` in `build.zig`. A cold `zig build` here - which also fetches
+the binding generator and runs it - takes about 96 seconds.
