@@ -79,10 +79,18 @@ pub fn build(b: *std.Build) void {
     });
     b.installArtifact(exe);
 
+    // The image to open. With no option the step shows the committed fixture,
+    // so `zig build run` does something instead of printing usage and failing;
+    // `zig build run -Dfile=<path>` opens something else.
+    //
+    // A build option rather than the arguments after `--`: Zig hands a build
+    // script only `-D` options, and `--` args are expanded by the runner for an
+    // `addPassthruArgs` marker it never shows the script.
+    const image = b.option([]const u8, "file", "the image to open") orelse "test/fixtures/quadrants.jpg";
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
-    run_cmd.addPassthruArgs();
-    const run_step = b.step("run", "Run iv");
+    run_cmd.addArg(image);
+    const run_step = b.step("run", "Run iv on an image");
     run_step.dependOn(&run_cmd.step);
 
     // Tests live beside the code and stay display-free: the core's root module
