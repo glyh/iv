@@ -1,4 +1,4 @@
-//! The Qt-free core: decode -> transform -> thumbnail -> cache. No Qt; the only
+//! The toolkit-free core: decode -> transform -> thumbnail -> cache. The only
 //! C++ is the exiv2 shim (ADR 0003). The shell consumes this directory and
 //! nothing deeper.
 //!

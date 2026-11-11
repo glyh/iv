@@ -28,8 +28,8 @@ settings, video, or windows.
   unit-tested with no GUI and no platform watchers.
 - Directory watching is platform and policy: inotify on Linux, kqueue on BSD,
   ReadDirectoryChangesW on Windows, plus polling fallbacks, plus "what counts as
-  a new file" rules. That churns with the shell's needs and Qt already provides
-  it (QFileSystemWatcher).
+  a new file" rules. That churns with the shell's needs and GIO provides it
+  (GFileMonitor).
 - It matches what the earlier research on qimgv called the core (decode ->
   scale -> thumbnail -> cache), so the boundary is not invented here.
 - The pieces excluded will still be ported later; they just do not have to be
@@ -37,10 +37,10 @@ settings, video, or windows.
 
 ## Consequences
 
-- The shell keeps owning file listing and watching. On Linux that is currently
-  QFileSystemWatcher plus a worker thread; it is not the Zig core's problem.
+- The shell keeps owning file listing and watching. On Linux the shell will use
+  GFileMonitor plus a worker thread; it is not the Zig core's problem.
 - EXIF orientation is a *decode* concern (a rotated photo must come out upright),
   so metadata enters the core at least for orientation. Where the rest of EXIF
   lives is decision 09.
 - Video and the mpv plugin stay entirely in the shell.
-- The core has no dependency on Qt by construction.
+- The core has no dependency on a UI toolkit by construction.

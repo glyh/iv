@@ -15,8 +15,8 @@ them. The choice is made by looking at the first few bytes, the **magic
 bytes**: a JPEG starts with `FF D8`, a PNG with `89 50 4E 47`.
 
 The reference viewer leaves all of this to Qt's QImageReader, which dispatches to
-format plugins. That dispatch is invisible and untouchable; a Qt-free core needs
-its own.
+format plugins. That dispatch is invisible and untouchable; a toolkit-free core
+needs its own.
 
 ## The options
 
@@ -66,8 +66,9 @@ it.
 The v1 core handles **still images only**. Animation - GIF, animated WebP,
 APNG - becomes a separate, later interface: a frame stream carrying per-frame
 timing, looping and disposal rules. Until that interface exists an animated file
-decodes as its first frame, and the shell keeps a Qt/QMovie path (libqt6zig
-binds QMovie) so animation does not visibly regress during the transition.
+decodes as its first frame, and the shell keeps a GdkPixbufAnimation path
+(gdk-pixbuf ships with GTK4) so animation does not visibly regress during the
+transition.
 
 Why: stills are the overwhelming majority of the app, and the budget, scheduler
 and progressive-stream designs are all about a single image. Animation adds
@@ -77,8 +78,8 @@ stable.
 
 ## Backend set (decided)
 
-Three tiers, in the spirit of the optional-dependency flags a Qt build uses
-(`-Dexiv2`, `-Dopencv`, `-Dkde`):
+Three tiers, in the spirit of the optional-dependency flags the reference
+viewer's build uses (`-Dexiv2`, `-Dopencv`, `-Dkde`):
 
 - **Tier 1, always present**: JPEG (libjpeg-turbo), PNG (libpng), and
   `stb_image` as a catch-all for BMP/TGA/PSD/HDR/PIC. Small, no build flags.

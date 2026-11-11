@@ -45,8 +45,8 @@ than keeping the core C-only.
 - **The core now contains exactly one C++ translation unit.** The C functions the
   shim exports are the only surface the Zig side sees.
 - That unit is compiled by **Zig's own clang**, against the system libstdc++
-  headers. Zig bundles clang and libc++, but Qt and exiv2 are libstdc++
-  libraries, so the shim must use libstdc++ headers and link system libstdc++.
+  headers. Zig bundles clang and libc++, but exiv2 is a libstdc++ library, so
+  the shim must use libstdc++ headers and link system libstdc++.
   The verified recipe - and the correction of an earlier wrong claim that Zig's
   clang could not parse gcc-16 headers at all - is in
   `../research/zig-cpp-interop.md`.

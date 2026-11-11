@@ -1,6 +1,6 @@
 # iv in one page
 
-iv is built in two phases: a Qt-free Zig **core** first, then the application
+iv is built in two phases: a toolkit-free Zig **core** first, then the application
 rebuilt on top of it. This folder holds one document per decision; this page is
 the map, and `README.md` is the index.
 

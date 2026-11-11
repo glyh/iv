@@ -1,6 +1,6 @@
 //! The core's pixel type. This is an owning, tightly-packed buffer whose format
-//! is explicit. The Qt shell converts it to a QImage at its boundary and nowhere
-//! else.
+//! is explicit. The shell converts it to its own image type at its boundary and
+//! nowhere else.
 //!
 //! The constructors validate what external input decides - a width taken from a
 //! file header, a file's byte count - and return errors instead of letting the

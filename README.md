@@ -36,7 +36,7 @@ Copyright (C) 2026 glyh.
 ```
 src/
   main.zig        the application entry point
-  core/           the Qt-free core
+  core/           the toolkit-free core
     root.zig      the core's entry point
     bitmap.zig    the pixel type
     imageops.zig  scale, crop, flip, rotate, fitWithin

@@ -31,7 +31,7 @@ them.
 
 ## Architecture invariants
 
-- The **core** (`src/core/`) is Qt-free and owns only the pixel pipeline:
+- The **core** (`src/core/`) is free of any UI toolkit and owns only the pixel pipeline:
   decode, transform, thumbnail, cache. Directories, settings, video and UI are
   the shell.
 - Decode is a **registry of backends**, one module per library; still images
@@ -47,8 +47,8 @@ them.
 - Concurrency: the core owns a fixed pool with two priority bands; cancellation
   is cooperative, checked at step boundaries.
 - Every event has exactly one consumer: an app-internal event is a plain Zig
-  callback, and a worker that must reach the Qt main thread goes through the
-  binding's `Threading` helpers. An event with two consumers is a new decision to
+  callback, and a worker that must reach the GTK main thread goes through
+  `g_main_context_invoke`. An event with two consumers is a new decision to
   record.
 - Errors are values. Nothing in the core panics, and no `unreachable` sits on a
   path that external input can reach.
@@ -58,7 +58,7 @@ them.
 
 - Commit subjects: `scope: imperative summary` (for example,
   `core: add the area prefilter`).
-- Keep the core testable without a Qt install; commit any test fixture.
+- Keep the core testable without a UI toolkit install; commit any test fixture.
 - Add a term to `CONTEXT.md` when it is introduced or sharpened. Add an ADR only
   when a decision is hard to reverse, surprising, and the result of a real
   trade-off.

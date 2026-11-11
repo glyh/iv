@@ -1,5 +1,5 @@
 //! The core's pixel math: scale, crop, flip, rotate. Everything here owns its
-//! output and takes an allocator; nothing knows about Qt.
+//! output and takes an allocator; nothing knows about a UI toolkit.
 //!
 //! TODO: the scaler is a first cut. `nearest` and `bilinear` are the only
 //! filters, and `bilinear` reads straight alpha, so a transparent edge blends
