@@ -77,3 +77,20 @@ figure ever becomes the binding constraint.
 - The shell cannot lean on Qt's raster widgets; every widget is a GTK call.
 - The bindings are generated from the installed GIR data, so they track the
   system's GTK rather than a version iv chooses.
+
+## Addendum (2026-11-11)
+
+Re-checked against GTK 4.24.1 on this machine and against `main` (4.25.0): both
+Vulkan claims still hold. `GdkVulkanContext` is still `GDK_DECLARE_INTERNAL_TYPE`
+and `gdk_surface_create_vulkan_context` is a stub that sets *"GTK does not
+expose Vulkan internals."* before returning `FALSE`; `GskVulkanRenderer` renders
+GSK's own render node tree, not application content, and there is no
+`GtkVulkanArea`. `GtkGLArea` carries no deprecation and GTK's 4-to-5 migration
+guide does not mention GL, Vulkan or renderers.
+
+The one thing this decision did not say: GSK itself may render the *widgets* with
+Vulkan (preferred on Wayland since 4.16). That does not offer the app a Vulkan
+path and does not disturb the viewport - measured under `GSK_RENDERER=gl` and
+`=vulkan`, with the image drawn and no GSK warning in either case. Details and
+the shader-source decision are in `../design/12-ui-renderer.md` and
+`../research/zig-shaders-spirv.md`.
