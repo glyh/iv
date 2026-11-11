@@ -2,7 +2,7 @@
 id: 006
 title: Stand up the GTK4 shell skeleton
 labels: [wayfinder:task]
-status: open
+status: closed
 assignee:
 blocked_by: [004]
 ---
@@ -32,3 +32,23 @@ somewhere to put a viewport.
   cleanly.
 - The window-building smoke test passes under `xvfb-run`, and `zig build test`
   still passes with no display.
+
+## Answer
+
+**The shell is a GTK4 application with one window and one GL area.**
+
+`src/shell/app.zig` builds a `GtkApplication`, and its `activate` handler
+creates an `ApplicationWindow` holding a `GtkGLArea`. `src/main.zig` takes the
+path, decodes before the event loop starts, and hands the bitmap to the shell;
+the exit status is `g_application_run`'s.
+
+Two things differ from what this ticket asked for:
+
+- **The invocation is `zig build run -Dfile=<path>`, not `zig build run --
+  <path>`.** A build script is handed only `-D` options: the arguments after
+  `--` are expanded by the runner from an `addPassthruArgs` marker the script
+  never sees. `zig build run` with no option opens the committed fixture.
+- **The smoke test is `zig build check`**, not a second step. It runs the
+  binary under `xvfb-run`, draws, reads two pixels back and fails when they are
+  not the fixture's red and blue. GTK4 has no offscreen backend, so a
+test that builds a window cannot be display-free (decision 11).

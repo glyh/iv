@@ -6,10 +6,8 @@
 //! zig build test runs them without a display.
 
 // TODO: what the core still needs, in the order it is worth building:
-//   - decode: a registry of backends. JPEG first (libjpeg-turbo), then PNG, then
-//     the optional WebP/TIFF/GIF/AVIF/JXL/HEIF/SVG/RAW backends. A decode
-//     request carries a maximum size; decode at that size, never decode whole
-//     and shrink.
+//   - decode: the registry of backends (decision 03) and the size contract
+//     (ticket 002). JPEG is here; PNG and the rest are not.
 //   - transform: the two-pass scaler (premultiply, area prefilter above 2x,
 //     bicubic, unpremultiply) and the lcms2 colour step.
 //   - thumbnail: the freedesktop on-disk cache contract.
@@ -19,11 +17,15 @@
 
 pub const bitmap = @import("bitmap.zig");
 pub const imageops = @import("imageops.zig");
+pub const decode = @import("decode/root.zig");
 
 pub const Bitmap = bitmap.Bitmap;
 pub const Format = bitmap.Format;
 
 test {
+    // Load-bearing, for the reason spelled out in decode/root.zig: a module that
+    // is imported but never analysed contributes none of its tests.
     _ = bitmap;
     _ = imageops;
+    _ = decode;
 }

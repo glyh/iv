@@ -33,6 +33,16 @@ What UI stack and render path does the phase-2 application use?
   deprecated in GTK 4.14 (this machine runs 4.24.1). Both offer a public OpenGL
   widget. So the binding was what blocked the viewport, and this decision
   forecloses Vulkan rather than rescuing it.
+- **GTK's own renderer is not the viewport's.** GTK draws widgets with GSK,
+  chosen by `GSK_RENDERER`: `gl` (the only GL renderer since 4.18, when the old
+  one was removed and `ngl` was renamed to it), `vulkan`, `cairo`, and
+  `broadway` (deprecated in 4.20). On Wayland GSK prefers Vulkan; on X11 it
+  still prefers GL. This never reaches the app: there is no Vulkan area for
+  application content in either case, and the `GtkGLArea` viewport draws the
+  image under both renderers - `GSK_RENDERER=gl` and `=vulkan` each showed
+  `test/fixtures/quadrants.jpg` with no GSK warning and the same count of
+  saturated samples (8576 of 518400), though the two runs were not compared
+  pixel for pixel.
 - Measured costs: GTK4 61 MB empty and 112 libraries, against Qt Widgets
   44 MB and 44 libraries and GTK3 33.9 MB and 69 libraries
   (`../research/gui-stack-weight.md`, re-measured in
@@ -74,6 +84,13 @@ What UI stack and render path does the phase-2 application use?
   ADR 0007.
 - **OpenGL, not Vulkan.** The earlier "no OpenGL" rule is withdrawn. The
   renderer module is the only place that knows which API is used.
+- **Shaders stay GLSL.** Authoring them in Zig, compiled to SPIR-V and loaded
+  through `GL_ARB_gl_spirv`, was spiked end to end and works on this machine
+  (`../research/zig-shaders-spirv.md`), and is **deferred until it is mature**:
+  the load path is Mesa-only today, uniform reflection is lost (bindings must be
+  shared as constants), and a `spirv64-vulkan` module crashes Mesa at link. The
+  quad has no logic to type-check. Revisit when a shader carries real work, or
+  when the GL driver coverage and those three quirks are settled.
 - **GL context loss is handled in one place**: `GtkGLArea` can fail to realize
   or lose its `GdkGLContext` (the `create-context` signal), and every GL
   resource is rebuilt there.

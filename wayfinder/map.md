@@ -14,9 +14,10 @@ decode → display path working end to end, on `trunk`, with the toolkit-free
 parts covered by `zig build test`.
 
 A **slice** is one commit-sized increment that leaves the tree building and
-tested. Reaching the destination settles the libjpeg-turbo binding, the
-decode-backend registry, the fit-and-size contract, the Zig–GTK boundary and the
-zig-gobject build. The rest of the core — the byte-budget cache, the worker
+tested. Reaching the destination settled the libjpeg-turbo binding, the Zig–GTK
+boundary and the zig-gobject build. It did **not** settle the decode-backend
+registry or the fit-and-size contract: the display path works with one backend
+and no size request, and both are still open. The rest of the core — the byte-budget cache, the worker
 pool, the freedesktop thumbnail cache, lcms2 colour, the remaining decode
 backends — is beyond this destination and graduates from **Not yet specified**
 when the frontier reaches it.
@@ -41,8 +42,8 @@ dev headers resolves under pkg-config (`pkg-config --modversion gtk4`), and
 `zig translate-c` consumes the whole `gtk/gtk.h` with zero errors; the measured
 recipe is `docs/research/gtk4-zig-interop.md`. The shell reaches GTK through
 **zig-gobject** instead: `gobject-introspection` 1.86.0-2 is installed, and
-`cairo-1.0.gir` and `freetype2-2.0.gir` were regenerated from their typelibs
-because only the typelibs ship (`docs/research/zig-gobject.md`). GTK4 has **no offscreen GDK
+`cairo-1.0.gir` and `freetype2-2.0.gir` are regenerated from their typelibs by
+the build, because only the typelibs ship (`docs/research/zig-gobject.md`). GTK4 has **no offscreen GDK
 backend** — `GDK_BACKEND=offscreen` answers "No such backend" — so anything
 that needs a display runs under `xvfb-run`.
 
@@ -75,6 +76,19 @@ settled immediately before a slice. `wayfinder/README.md` has the operations;
   move to GTK4. See ticket 011.
 - The Zig–GTK boundary and the shell's shape — the shell reaches GTK through
   `zig-gobject`; the rules live in `src/shell/root.zig`. See ticket 004.
+- Store decoded pixels in the backend's native format — the JPEG backend keeps
+  the file's colour space; CMYK is refused rather than mislabelled. See
+  ticket 012.
+- Probe without starting decompression, and pick the format by colour space —
+  the probe reads the header only, and the format is keyed on the colour space
+  rather than a channel count. See ticket 013.
+- How Zig binds libjpeg-turbo, and where setjmp lives — a C shim owns the jump;
+  `translate-c` reads the shim's header, never libjpeg's. See ticket 001.
+- Stand up the GTK4 shell skeleton — one window, one GL area, and the display
+  check; the run step takes `-Dfile`, not `--`. See ticket 006.
+- The GtkGLArea OpenGL viewport — one textured quad, shaders as GLSL files, and
+  the driver's own message when a shader fails. Mipmaps moved to ticket 014.
+  See ticket 008.
 
 ## Not yet specified
 
@@ -94,11 +108,9 @@ settled immediately before a slice. `wayfinder/README.md` has the operations;
 - The remaining decode backends (PNG, WebP, TIFF, GIF first frame). Each is
   small; how many land in this effort is worth one decision once the JPEG
   backend exists.
-- The renderer past the first quad: mipmap-only versus tiled upload versus GPU
-  filters. `docs/research/qt-renderer-frontier.md` gives the cost ordering; it
-  is a Qt/QRhi-era document, so its mipmap-sampling conclusion transfers and
-  its QRhi specifics do not. Decide once a viewport exists and mid-zoom
-  behaviour can be seen.
+- The shell's surface beyond showing one file: a menu, a file dialog and
+  keyboard handling. None is specified yet; `src/shell/root.zig`'s TODO carries
+  the list until one of them is worth a ticket.
 - Animation as a frame stream (GIF, animated WebP, APNG). Decision 03 defers
   it; the shell may keep a `GdkPixbufAnimation` path meanwhile.
 

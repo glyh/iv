@@ -1,2 +1,5 @@
 .zig-cache/
 zig-out/
+
+# Zig's local package cache (dependencies fetched by `zig build`).
+zig-pkg/

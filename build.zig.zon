@@ -5,13 +5,22 @@
     // another, so it must never change; regenerating it is a hostile fork.
     .fingerprint = 0x4c801618b71e8fca,
     .minimum_zig_version = "0.17.0",
-    .dependencies = .{},
+    .dependencies = .{
+        // The binding generator, pinned. Not the bindings themselves: build.zig
+        // runs this and builds the modules from its output, so `zig build` is
+        // the only entry point (decision 10). See docs/research/zig-gobject.md.
+        .zig_gobject = .{
+            .url = "git+https://github.com/ianprime0509/zig-gobject#93afca136b82d4e8d2476298529fc6f6be4bcc07",
+            .hash = "gobject_codegen-0.3.2-B33qzSZpBwCm9aOggVlrDqGy7aN7FN_w5JjW0i0X5X0t",
+        },
+    },
     // What a consumer of this package receives: the build files, the sources, the
     // README and the licence. The design documents and CLAUDE.md are for this
     // repository, not for the package.
     .paths = .{
         "build.zig",
         "build.zig.zon",
+        "build",
         "src",
         "README.md",
         "LICENSE",
