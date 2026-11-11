@@ -89,6 +89,8 @@ pub fn build(b: *std.Build) void {
     const image = b.option([]const u8, "file", "the image to open") orelse "test/fixtures/quadrants.jpg";
     const run_cmd = b.addRunArtifact(exe);
     run_cmd.step.dependOn(b.getInstallStep());
+    // The step exists to run a program, so it has side effects.
+    run_cmd.has_side_effects = true;
     run_cmd.addArg(image);
     const run_step = b.step("run", "Run iv on an image");
     run_step.dependOn(&run_cmd.step);
@@ -108,6 +110,9 @@ pub fn build(b: *std.Build) void {
     // The display check of decision 11: render a fixture under Xvfb, read two
     // pixels back, and report.
     const check_cmd = b.addSystemCommand(&.{"xvfb-run"});
+    // Likewise, and a check that quietly stops checking is the failure this
+    // flag exists to prevent.
+    check_cmd.has_side_effects = true;
     check_cmd.addArg("-a");
     check_cmd.addArtifactArg(exe);
     check_cmd.addArgs(&.{ "--check", "test/fixtures/quadrants.jpg" });
