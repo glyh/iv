@@ -42,3 +42,15 @@ The sequence of results one request may produce - typically a preview at a lower
 resolution, then the final resolution. The shell renders each result as it
 arrives.
 _Avoid_: callback (too generic to be useful here), result stream
+
+**GTK bindings**:
+The `zig-gobject`-generated Zig modules the shell imports to call GTK (`gtk`,
+`gdk`, `gio`, `glib`). They are generated at build time from the installed
+GObject-introspection data, so they track the system's GTK.
+_Avoid_: facade (there is no hand-written layer), wrapper
+
+**Viewport**:
+The shell's renderer: the part that takes a `Bitmap` and a target rectangle and
+puts the pixels on screen. It is an interface, so the renderer can be replaced
+without the core knowing which one runs.
+_Avoid_: canvas, surface (a `GdkSurface` is GTK's, and is not this)

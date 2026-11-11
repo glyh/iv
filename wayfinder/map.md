@@ -73,6 +73,8 @@ settled immediately before a slice. `wayfinder/README.md` has the operations;
   GL context. See ticket 005.
 - How the shell gets a QRhiWidget the binding does not have — dissolved by the
   move to GTK4. See ticket 011.
+- The Zig–GTK boundary and the shell's shape — the shell reaches GTK through
+  `zig-gobject`; the rules live in `src/shell/root.zig`. See ticket 004.
 
 ## Not yet specified
 

@@ -2,7 +2,7 @@
 id: 004
 title: The Zig-GTK boundary and the shell's shape
 labels: [wayfinder:grilling]
-status: open
+status: closed
 assignee: glyh
 blocked_by: []
 ---
@@ -44,3 +44,49 @@ Settle:
   ticket.
 - Any term the shell introduces is in `CONTEXT.md`, or is a word the glossary
   already defines.
+
+## Answer
+
+**The shell reaches GTK through `zig-gobject`, and the rules are written into
+`src/shell/root.zig`.**
+
+The boundary question changed shape while it was being settled. It started as
+"wrap GTK in a Zig facade, or call `gtk_*` directly", and the answer was the
+facade. Then the maintained-binding question was asked, and the answer is
+better: `zig-gobject` is the only live Zig binding for GTK
+(`docs/research/zig-gobject.md`), it generates from the installed GIR data
+rather than a hand-picked class list, and a probe written for iv builds and runs
+`GtkGLArea` under Xvfb. So the shell imports the generated modules and writes no
+facade of its own.
+
+Settled, and recorded in `src/shell/root.zig`:
+
+- **Reaching GTK**: the shell imports the `gtk`, `gdk`, `gio` and `glib`
+  modules. It does not hand-write a binding layer and does not `translate-c` the
+  GTK headers itself. The binding is the interop boundary, so a misbehaving GTK
+  call has a search space of the generated module plus the pinned revision.
+- **The `Viewport` seam**: a `*const Bitmap` and a target rectangle cross it;
+  the implementation uploads and draws, the fit arithmetic stays in the shell,
+  and nothing crosses back into the core.
+- **Events**: GTK's signals are consumed through the binding's typed
+  `signals.<name>.connect`, which carries a `user_data` pointer - no
+  `g_signal_connect` and no `GCallback` cast in the shell. An app-internal event
+  stays a plain Zig callback with one consumer (ADR 0001); a worker reaches the
+  main thread through `g_main_context_invoke`.
+- **Lifecycle**: `main.zig` builds a `GtkApplication` and calls
+  `g_application_run`; its status is the process exit status and where a failed
+  GTK init surfaces. Any direct `gtk_init_check` must be checked - GTK does not
+  guard later calls.
+- **Build**: a pinned `zig-gobject` revision whose generator runs as a build
+  step, needing `gobject-introspection` on the build machine.
+
+**Found while settling this, and left for ticket 008**: the binding has no
+`GL-1.0` module, because only its typelib is installed and there is no `.gir` to
+generate from. The viewport's `gl*` calls therefore come from a `translate-c`
+over `epoxy/gl.h` (GTK already links `libepoxy`) or over `GL/gl.h` with
+`libGL`. It is a `TODO` in `src/shell/root.zig`.
+
+**Adopting a binding re-opens ADR 0007's argument, and it is restated there**:
+the point is no longer that GTK4 has no binding layer, but that `zig-gobject`
+generates from the system's own introspection data (complete by construction)
+and binds C, where `libqt6zig` is a hand-curated list over C++.
