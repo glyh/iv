@@ -20,7 +20,8 @@ slice.
   shell-owned threads, so either the core gains its async entry point here or
   the blocking decode is recorded as an accepted first-slice compromise.
 - Say how the window size reaches the request and how the decoded aspect
-  becomes the quad's transform. `imageops.fitWithin` has no caller today.
+  becomes the quad's transform. `imageops.fitWithin` has its caller in the
+  viewport now, so what is left to settle is how the size reaches the decode.
 - Handle the three outcomes a file can have: decoded; recognized but broken;
   not recognized. A bad file produces a message; it does not crash or exit.
 - Orientation is **not** in this slice. Until ticket 010 lands, a photo whose
