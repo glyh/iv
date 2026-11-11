@@ -19,5 +19,5 @@ in `../adr/`; the vocabulary they settle lives in `../../CONTEXT.md`.
 | 09 | EXIF: exiv2 behind a C shim | decided | [09-exif-metadata.md](09-exif-metadata.md) |
 | 10 | Dependencies: one build entry point | decided | [10-dependencies-build.md](10-dependencies-build.md) |
 | 11 | Verification: simple unit tests (revised) | decided | [11-verification.md](11-verification.md) |
-| 12 | Phase-2 UI: Qt Widgets + QRhiWidget (Vulkan) | decided | [12-ui-renderer.md](12-ui-renderer.md) |
+| 12 | Phase-2 UI: GTK4 + GtkGLArea (OpenGL) | decided | [12-ui-renderer.md](12-ui-renderer.md) |
 | 13 | Repo: the Zig rewrite is its own repository | decided | [13-repo-strategy.md](13-repo-strategy.md) |

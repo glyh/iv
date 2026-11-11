@@ -29,10 +29,10 @@ the map, and `README.md` is the index.
   in the core.
 - **Build** ([10](10-dependencies-build.md)): one `zig build` entry point; Zig's
   clang compiles the shim.
-- **Verification** ([11](11-verification.md)): unit tests only; the differential
-  harness is optional.
-- **UI** ([12](12-ui-renderer.md)): a Qt Widgets shell; the viewport is a
-  `QRhiWidget` on Vulkan.
+- **Verification** ([11](11-verification.md)): unit tests, with display checks
+  under `xvfb-run`; the differential harness is optional.
+- **UI** ([12](12-ui-renderer.md)): a GTK4 shell; the viewport is a
+  `GtkGLArea` on OpenGL.
 - **Repo** ([13](13-repo-strategy.md)): iv is its own repository; qimgv is a reference.
 
 ## Reading order

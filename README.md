@@ -1,8 +1,8 @@
 # iv
 
 A Zig image viewer. The **core** - decode, transform, thumbnail, cache - is
-Qt-free and testable without a display. The shell (Qt Widgets, with a
-`QRhiWidget` viewport on Vulkan) is a later phase.
+free of any UI toolkit and testable without a display. The shell (GTK4, with a
+`GtkGLArea` viewport on OpenGL) is a later phase.
 
 The architecture was decided before the first line of code. The decision records
 are in `docs/design/`, the ADRs in `docs/adr/`, and the vocabulary in

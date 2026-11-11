@@ -8,12 +8,16 @@ How do we know iv is correct?
 
 ## Decision
 
-Verification is **unit tests only**:
+Verification is **unit tests**, plus a display check where a window is involved:
 
 - Constructed inputs whose expected output is computed by hand, covering the
   pure-Zig parts: bitmap, imageops, cache accounting, budget eviction.
 - A smoke test per decode backend: a committed fixture, asserting dimensions,
   format and no crash.
+- **Display checks run under `xvfb-run`.** The GL viewport needs a display, and
+  GTK4 has no offscreen backend (`GDK_BACKEND=offscreen` answers "No such
+  backend"), so a check that builds a window is run under `xvfb-run` and named
+  as such in its ticket.
 - **No differential harness** against qimgv as a gate.
 - **No conformance corpora** as a gate.
 
